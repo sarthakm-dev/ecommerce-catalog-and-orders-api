@@ -12,12 +12,14 @@ export const authMiddleware = (
     return res.status(401).json({ message: "Unauthorized" });
   }
   const parts = authHeader.split(" ");
-  if(parts.length !==2 || parts[0] !== "Bearer"){
+
+  if (parts.length !== 2 || parts[0] !== "Bearer") {
     return res.status(401).json({ message: "Unauthorized" });
   }
   const token = parts[1];
   try {
     req.user = jwt.verify(token, env.JWT_SECRET) as JwtUserpayload;
+    console.log(req.user);
     next();
   } catch {
     res.status(401).json({ message: "Invalid token" });

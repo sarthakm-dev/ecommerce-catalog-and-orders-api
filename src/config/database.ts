@@ -27,7 +27,18 @@ export const initDatabase = async () => {
     name TEXT NOT NULL UNIQUE,
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
     );
-  `)
+  `);
+
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS products (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    price REAL NOT NULL,
+    categoryId INTEGER NOT NULL,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (categoryId) REFERENCES categories(id)
+);
+  `);
   console.log("SQLite database initialized");
 };
 
