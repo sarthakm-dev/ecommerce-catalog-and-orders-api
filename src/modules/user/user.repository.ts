@@ -36,4 +36,13 @@ export class UserRepository {
       [id]
     );
   }
+
+  static async updateName(id:number,name:string){
+    const db = getDb();
+    const updated = await db.run(
+      `UPDATE users SET name = ? WHERE id = ?`,
+      [name,id]
+    );
+    return updated.changes;
+  }
 }

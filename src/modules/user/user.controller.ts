@@ -27,8 +27,17 @@ export const deleteMe = async (req:Request, res:Response, next:NextFunction) => 
         return res.status(401).json({message:"Unauthorized"});
     }
     await UserService.deleteMe(req.user.userId);
-    res.status(204).send();
+    res.status(204).send("Record Successfully deleted");
   } catch (err) {
     next(err);
   }
 };
+
+export const updateName = async(req: Request, res:Response, next: NextFunction)=>{
+  try{
+    await UserService.updateName(req.body, Number(req.user?.userId));
+    res.status(200).json({message: "Name Updated Successfully"});
+  }catch (err){
+    next(err);
+  }
+}

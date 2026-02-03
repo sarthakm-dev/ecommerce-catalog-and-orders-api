@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { createUser, getMe, deleteMe } from "./user.controller";
+import { createUser, getMe, deleteMe, updateName } from "./user.controller";
 import { authMiddleware } from "../../middlewares/auth.middleware";
 
 const router = Router();
 
-router.post("/", createUser);       // Register Instead later
+router.post("/", createUser);
 router.get("/me", authMiddleware, getMe);
 router.delete("/me", authMiddleware, deleteMe);
-
+router.patch("/me",authMiddleware,updateName);
 export default router;

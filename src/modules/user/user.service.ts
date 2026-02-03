@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { UserRepository } from "./user.repository";
 import { validateCreateUser } from "./user.validation";
+import { CategoryRepository } from "../category/category.repository";
 
 export class UserService {
   static async createUser(data: any) {
@@ -25,5 +26,16 @@ export class UserService {
       throw new Error("User not found");
     }
     await UserRepository.deleteById(userId);
+  }
+
+  static async updateName(data:any, id:number){
+    const name = data.name;
+    if(!name){
+      throw new Error("User name is required");
+    }
+    const updated = await UserRepository.updateName(id,name);
+    if(updated===0){
+        throw new Error("User not found")
+    }
   }
 }

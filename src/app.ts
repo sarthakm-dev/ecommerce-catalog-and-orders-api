@@ -3,11 +3,6 @@ import cors from "cors";
 import { registerRoutes } from "./routes";
 import { errorMiddleware } from "./middlewares/error.middleware";
 
-
-
-//import { registerRoutes } from "./routes";
-//import { errorMiddleware } from "./middlewares/error.middleware";
-
 const app = express();
 
 app.use(cors());

@@ -21,6 +21,13 @@ export const initDatabase = async () => {
     );
   `);
 
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS categories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `)
   console.log("SQLite database initialized");
 };
 
