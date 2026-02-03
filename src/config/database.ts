@@ -1,11 +1,11 @@
-import sqlite3 from "sqlite3";
-import { open, Database } from "sqlite";
+import sqlite3 from 'sqlite3';
+import { open, Database } from 'sqlite';
 
 let db: Database<sqlite3.Database, sqlite3.Statement>;
 
 export const initDatabase = async () => {
   db = await open({
-    filename: "./sqlite.db",
+    filename: './sqlite.db',
     driver: sqlite3.Database,
   });
 
@@ -37,12 +37,35 @@ export const initDatabase = async () => {
     categoryId INTEGER NOT NULL,
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (categoryId) REFERENCES categories(id)
-);
+    );
   `);
-  console.log("SQLite database initialized");
+
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS orders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    userId INTEGER NOT NULL,
+    totalAmount REAL NOT NULL,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userId) REFERENCES users(id)
+    );
+  `);
+
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS order_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    orderId INTEGER NOT NULL,
+    productId INTEGER NOT NULL,
+    quantity INTEGER NOT NULL,
+    price REAL NOT NULL,
+    FOREIGN KEY (orderId) REFERENCES orders(id),
+    FOREIGN KEY (productId) REFERENCES products(id)
+    );
+  `);
+
+  console.log('SQLite database initialized');
 };
 
 export const getDb = () => {
-  if (!db) throw new Error("Database not initialized");
+  if (!db) throw new Error('Database not initialized');
   return db;
 };
