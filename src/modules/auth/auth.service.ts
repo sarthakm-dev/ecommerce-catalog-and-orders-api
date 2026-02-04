@@ -1,9 +1,9 @@
 import bcrypt from 'bcryptjs';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt, { JwtPayload, Secret } from 'jsonwebtoken';
 import { env } from '../../config/env';
 import { UserRepository } from '../user/user.repository';
 import { RefreshTokenRepository } from './refresh-token.repository';
-import crypto from 'node:crypto';
+import { SignOptions } from 'jsonwebtoken';
 export class AuthService {
   static async login(data: any) {
     const { email, password } = data;
@@ -14,15 +14,17 @@ export class AuthService {
     const match = await bcrypt.compare(password, user.passwordHash);
     if (!match) throw new Error('Invalid credentials');
 
+    await RefreshTokenRepository.deleteByUserId(user.id);
+
     const accessToken = jwt.sign({ userId: user.id, role: user.role }, env.JWT_SECRET, {
-      expiresIn: '15m',
+      expiresIn: env.ACCESS_TOKEN_EXPIRES_IN,
     });
 
     const refreshToken = jwt.sign({ userId: user.id, role: user.role }, env.REFRESH_SECRET, {
-      expiresIn: '7d',
+      expiresIn: env.REFRESH_TOKEN_EXPIRES_IN,
     });
 
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+    const expiresAt = new Date(Date.now() + env.REFRESH_TOKEN_EXPIRES_IN_MS).toISOString();
 
     await RefreshTokenRepository.create(user.id, refreshToken, expiresAt);
 
@@ -54,20 +56,15 @@ export class AuthService {
     }
 
     const accessToken = jwt.sign({ userId: user.id, role: user.role }, env.JWT_SECRET, {
-      expiresIn: '15m',
+      expiresIn: env.ACCESS_TOKEN_EXPIRES_IN,
     });
 
     return accessToken;
   }
 
   static async logout(refreshToken: string) {
-    console.log('LOGOUT SERVICE TOKEN', refreshToken);
     const stored = await RefreshTokenRepository.find(refreshToken);
-    console.log('FOUND IN DB', stored);
     if (!stored) return;
     await RefreshTokenRepository.deleteByUserId(stored.userId);
-    console.log('deleting refresh token:', refreshToken);
-    const stillThere = await RefreshTokenRepository.find(refreshToken);
-    console.log('Still Exists?', stillThere);
   }
 }

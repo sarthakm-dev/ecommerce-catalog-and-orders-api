@@ -5,12 +5,12 @@ import { errorMiddleware } from './middlewares/error.middleware';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import helmet from 'helmet';
-import { limiter } from './config/limiter';
+import { rateLimiter } from './config/rate-limiter';
 import { options } from './config/swagger-options';
 
 const app = express();
 
-app.use(limiter);
+app.use(rateLimiter);
 app.use(helmet());
 app.use(cors());
 app.use(express.json());

@@ -67,7 +67,7 @@ export const initDatabase = async () => {
   await db.exec(`
     CREATE TABLE IF NOT EXISTS refresh_tokens (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    userId INTEGER NOT NULL,
+    userId INTEGER NOT NULL UNIQUE,
     token TEXT NOT NULL UNIQUE,
     expiresAt DATETIME NOT NULL,
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
