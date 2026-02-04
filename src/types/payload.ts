@@ -1,6 +1,6 @@
-import { UserRole } from "../config/constants";
+import { UserRole } from './role';
 export interface JwtUserpayload {
-    userId: number;
-    email: string;
-    role: UserRole;
+  userId: number;
+  email: string;
+  role: UserRole;
 }

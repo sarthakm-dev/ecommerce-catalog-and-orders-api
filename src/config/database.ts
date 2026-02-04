@@ -9,6 +9,8 @@ export const initDatabase = async () => {
     driver: sqlite3.Database,
   });
 
+  await db.exec(`PRAGMA foreign_keys = ON;`);
+
   await db.exec(`
     CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -34,6 +36,7 @@ export const initDatabase = async () => {
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     price REAL NOT NULL,
+    stock INTEGER NOT NULL DEFAULT 0,
     categoryId INTEGER NOT NULL,
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (categoryId) REFERENCES categories(id)
@@ -61,7 +64,16 @@ export const initDatabase = async () => {
     FOREIGN KEY (productId) REFERENCES products(id)
     );
   `);
-
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS refresh_tokens (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    userId INTEGER NOT NULL,
+    token TEXT NOT NULL UNIQUE,
+    expiresAt DATETIME NOT NULL,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userId) REFERENCES users(id)
+  );
+    `);
   console.log('SQLite database initialized');
 };
 

@@ -1,10 +1,11 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 
 dotenv.config();
 
 export const env = {
   PORT: process.env.PORT || 3000,
-  JWT_SECRET: process.env.JWT_SECRET || "supersecret",
-  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "15m",
-  REFRESH_TOKEN_EXPIRES_IN: process.env.REFRESH_TOKEN_EXPIRES_IN || "7d",
+  JWT_SECRET: process.env.JWT_SECRET || 'supersecret',
+  REFRESH_SECRET: process.env.REFRESH_SECRET || 'refreshsecret',
+  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '15m',
+  REFRESH_TOKEN_EXPIRES_IN: process.env.REFRESH_TOKEN_EXPIRES_IN || '7d',
 };

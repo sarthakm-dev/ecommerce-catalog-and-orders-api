@@ -14,6 +14,10 @@ export class OrderService {
       if (!product) {
         throw new Error(`Product ${item.productId} not found`);
       }
+      const updated = await ProductRepository.reduceStock(product.id, item.quantity);
+      if (updated === 0) {
+        throw new Error(`Insuffient stock for ${product.name}`);
+      }
       totalAmount += product.price * item.quantity;
     }
 

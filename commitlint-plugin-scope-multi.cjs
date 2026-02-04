@@ -5,7 +5,7 @@ module.exports = {
         return [true]; // scope-empty will handle empty scope
       }
 
-      const validScopes = ['cli', 'docs', 'release', 'component', 'registry', 'storybook', 'cli-tool','api'];
+      const validScopes = ['cli', 'docs', 'release', 'component','api','core','db'];
       const delimiters = [',', '/'];
       const scopes = parsed.scope
         .split(new RegExp(`[${delimiters.map(d => d === '/' ? '\\/' : d).join('')}]`))

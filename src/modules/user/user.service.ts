@@ -1,7 +1,6 @@
-import bcrypt from "bcryptjs";
-import { UserRepository } from "./user.repository";
-import { validateCreateUser } from "./user.validation";
-import { CategoryRepository } from "../category/category.repository";
+import bcrypt from 'bcryptjs';
+import { UserRepository } from './user.repository';
+import { validateCreateUser } from './user.validation';
 
 export class UserService {
   static async createUser(data: any) {
@@ -9,7 +8,7 @@ export class UserService {
 
     const existing = await UserRepository.findByEmail(data.email);
     if (existing) {
-      throw new Error("Email already exists");
+      throw new Error('Email already exists');
     }
 
     const passwordHash = await bcrypt.hash(data.password, 10);
@@ -23,19 +22,27 @@ export class UserService {
   static async deleteMe(userId: number) {
     const user = await UserRepository.findById(userId);
     if (!user) {
-      throw new Error("User not found");
+      throw new Error('User not found');
     }
     await UserRepository.deleteById(userId);
   }
 
-  static async updateName(data:any, id:number){
+  static async updateName(data: any, id: number) {
     const name = data.name;
-    if(!name){
-      throw new Error("User name is required");
+    if (!name) {
+      throw new Error('User name is required');
     }
-    const updated = await UserRepository.updateName(id,name);
-    if(updated===0){
-        throw new Error("User not found")
+    const updated = await UserRepository.updateName(id, name);
+    if (updated === 0) {
+      throw new Error('User not found');
     }
+  }
+
+  static async updateUserRole(id: number, role: 'ADMIN' | 'USER') {
+    const user = await UserRepository.findById(id);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    await UserRepository.updateRole(id, role);
   }
 }
