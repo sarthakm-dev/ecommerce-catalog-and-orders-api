@@ -18,6 +18,25 @@ export class PermissionRepository {
 
     return !!result;
   }
+
+  static async getRoleId(roleName: string) {
+    const db = getDb();
+    const response = await db.get(
+      `
+      SELECT id FROM roles WHERE name = ?
+    `,
+      [roleName],
+    );
+    return response;
+  }
+
+  static async getPermissionId(permissions: string[]) {
+    const db = getDb();
+    const placeholder = permissions.map(() => '?').join(', ');
+    const query = `SELECT id FROM permissions WHERE name IN (${placeholder})`;
+    const response = await db.all(query, ...permissions);
+    return response;
+  }
   static async attachPermission(roleId: number, permissionId: number) {
     const db = getDb();
 

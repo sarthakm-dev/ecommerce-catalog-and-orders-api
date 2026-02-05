@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import { authMiddleware, requirePermission } from '../../middlewares/auth.middleware';
-import { attachPermissionToRole } from './permission.controller';
+import { attachPermissionToRole, getPermissionId, getRoleId } from './permission.controller';
 
 const router = Router();
 
 /**
  * @swagger
- * /api/permissions/{id}:
+ * /api/permissions/:
  *   post:
  *     summary: Attach a permission to a role
  *     description: |
@@ -16,13 +16,6 @@ const router = Router();
  *       - Permissions
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: Role ID to which permission will be attached
  *     requestBody:
  *       required: true
  *       content:
@@ -30,11 +23,15 @@ const router = Router();
  *           schema:
  *             type: object
  *             required:
- *               - permissionId
+ *               - roleName
+ *               - permissions
  *             properties:
- *               permissionId:
- *                 type: integer
- *                 example: 3
+ *               roleName:
+ *                 type: string
+ *                 example: "USER"
+ *               permissions:
+ *                 type: string[]
+ *                 example: ["CREATE_PRODUCT","VIEW_CATEGORIES","PLACE_ORDER"]
  *     responses:
  *       200:
  *         description: Permission attached successfully
@@ -47,6 +44,6 @@ const router = Router();
  *       404:
  *         description: Role or permission not found
  */
-router.post('/:id', authMiddleware, requirePermission('MANAGE_ROLES'), attachPermissionToRole);
+router.post('/', authMiddleware, requirePermission('MANAGE_ROLES'), attachPermissionToRole);
 
 export default router;
