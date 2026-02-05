@@ -113,7 +113,7 @@ router.patch('/me', authMiddleware, updateName);
 
 /**
  * @swagger
- * /api/users/{id}/role:
+ * /api/users/role:
  *   post:
  *     summary: Assign role to a user
  *     description: >
@@ -123,13 +123,6 @@ router.patch('/me', authMiddleware, updateName);
  *       - Users
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: User ID
  *     requestBody:
  *       required: true
  *       content:
@@ -137,12 +130,17 @@ router.patch('/me', authMiddleware, updateName);
  *           schema:
  *             type: object
  *             required:
- *               - roleId
+ *               - emailId
+ *               - roleName
  *             properties:
- *               roleId:
- *                 type: integer
- *                 example: 1
- *                 description: Role ID to assign
+ *               emailId:
+ *                 type: string
+ *                 example: sarthak@gmail.com
+ *                 description: Email ID of user
+ *               roleName:
+ *                 type: string
+ *                 example: "USER"
+ *                 description: Role name you want to assign
  *     responses:
  *       200:
  *         description: Role assigned successfully
@@ -161,7 +159,7 @@ router.patch('/me', authMiddleware, updateName);
  *       403:
  *         description: Forbidden (missing MANAGE_ROLES permission)
  */
-router.post('/:id/role', authMiddleware, assignRole);
+router.post('/role', authMiddleware, assignRole);
 
 /**
  * @swagger

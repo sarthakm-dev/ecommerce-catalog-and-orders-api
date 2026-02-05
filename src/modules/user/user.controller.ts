@@ -1,3 +1,4 @@
+import { PermissionRepository } from '../permission/permission.repository';
 import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
 import { Request, Response, NextFunction } from 'express';
@@ -45,8 +46,15 @@ export const updateName = async (req: Request, res: Response, next: NextFunction
 
 export const assignRole = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = Number(req.params.id);
-    const roleId = parseInt(req.body.roleId, 10);
+    const { emailId, roleName } = req.body;
+    console.log('EmailID', emailId, 'RoleName:', roleName);
+    if (!emailId || !roleName) {
+      return res.status(400).json({ message: 'emailId and roleName both are required' });
+    }
+    const user = await UserRepository.findByEmail(emailId);
+    const userId = user.id;
+    const role = await PermissionRepository.getRoleId(roleName);
+    const roleId = Number(role.id);
     console.log('raw body', req.body);
     console.log('roleId', roleId);
     if (!userId || !roleId) {
