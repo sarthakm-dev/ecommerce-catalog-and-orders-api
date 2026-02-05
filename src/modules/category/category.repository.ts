@@ -1,36 +1,50 @@
-import { getDb } from "../../config/database";
+import { getDb } from '../../config/database';
 
 export class CategoryRepository {
   static async create(name: string) {
     const db = getDb();
-    const result = await db.run(`INSERT INTO categories (name) VALUES (?)`, [
-      name,
-    ]);
-    return result.lastID;
+
+    const { rows } = await db.query(
+      `
+      INSERT INTO categories (name)
+      VALUES ($1)
+      RETURNING id
+      `,
+      [name],
+    );
+
+    return rows[0].id;
   }
 
   static async findAll() {
     const db = getDb();
-    return db.all(`SELECT id, name, createdAt FROM categories`);
+
+    const { rows } = await db.query(`SELECT id, name, created_at FROM categories`);
+
+    return rows;
   }
 
   static async findById(id: number) {
     const db = getDb();
-    return db.get(`SELECT id, name, createdAt FROM categories WHERE id = ?`, [
+
+    const { rows } = await db.query(`SELECT id, name, created_at FROM categories WHERE id = $1`, [
       id,
     ]);
+
+    return rows[0];
   }
 
   static async deleteById(id: number) {
     const db = getDb();
-    await db.run(`DELETE FROM categories WHERE id = ?`, [id]);
+
+    await db.query(`DELETE FROM categories WHERE id = $1`, [id]);
   }
+
   static async updateName(id: number, name: string) {
     const db = getDb();
-    const result = await db.run(`UPDATE categories SET name = ? WHERE id = ?`, [
-      name,
-      id,
-    ]);
-    return result.changes;
+
+    const result = await db.query(`UPDATE categories SET name = $1 WHERE id = $2`, [name, id]);
+
+    return result.rowCount;
   }
 }

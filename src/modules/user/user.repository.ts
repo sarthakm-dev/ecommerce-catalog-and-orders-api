@@ -3,50 +3,70 @@ import { getDb } from '../../config/database';
 export class UserRepository {
   static async create(name: string, email: string, passwordHash: string) {
     const db = getDb();
-    const result = await db.run(
-      `INSERT INTO users (name, email, passwordHash)
-       VALUES (?, ?, ?)`,
+
+    const { rows } = await db.query(
+      `
+      INSERT INTO users (name, email, password_hash)
+      VALUES ($1, $2, $3)
+      RETURNING id
+      `,
       [name, email, passwordHash],
     );
-    return result.lastID;
+
+    return rows[0].id;
   }
 
   static async findByEmail(email: string) {
     const db = getDb();
-    return db.get(`SELECT * FROM users WHERE email = ?`, [email]);
+
+    const { rows } = await db.query(`SELECT * FROM users WHERE email = $1`, [email]);
+
+    return rows[0];
   }
 
   static async findById(id: number) {
     const db = getDb();
-    return db.get(
-      `SELECT id, name, email,createdAt
-       FROM users
-       WHERE id = ?`,
+
+    const { rows } = await db.query(
+      `
+      SELECT id, name, email, created_at
+      FROM users
+      WHERE id = $1
+      `,
       [id],
     );
+
+    return rows[0];
   }
 
   static async deleteById(id: number) {
     const db = getDb();
-    await db.run(`DELETE FROM users WHERE id = ?`, [id]);
+
+    await db.query(`DELETE FROM users WHERE id = $1`, [id]);
   }
 
   static async updateName(id: number, name: string) {
     const db = getDb();
-    const updated = await db.run(`UPDATE users SET name = ? WHERE id = ?`, [name, id]);
-    return updated.changes;
+
+    const result = await db.query(`UPDATE users SET name = $1 WHERE id = $2`, [name, id]);
+
+    return result.rowCount;
   }
 
   static async clearRoles(userId: number) {
     const db = getDb();
-    await db.run(`DELETE FROM user_roles WHERE userId = ?`, [userId]);
+
+    await db.query(`DELETE FROM user_roles WHERE user_id = $1`, [userId]);
   }
+
   static async assign(userId: number, roleId: number) {
     const db = getDb();
-    await db.run(
+
+    await db.query(
       `
-      INSERT OR IGNORE INTO user_roles (userId,roleId)
-      VALUES (?, ?)
+      INSERT INTO user_roles (user_id, role_id)
+      VALUES ($1, $2)
+      ON CONFLICT DO NOTHING
       `,
       [userId, roleId],
     );
@@ -55,34 +75,39 @@ export class UserRepository {
   static async getRoles(userId: number) {
     const db = getDb();
 
-    return db.all(
+    const { rows } = await db.query(
       `
-    SELECT
-      r.id   AS roleId,
-      r.name AS roleName
-    FROM user_roles ur
-    JOIN roles r ON r.id = ur.roleId
-    WHERE ur.userId = ?
-    `,
+      SELECT
+        r.id   AS role_id,
+        r.name AS role_name
+      FROM user_roles ur
+      JOIN roles r ON r.id = ur.role_id
+      WHERE ur.user_id = $1
+      `,
       [userId],
     );
+
+    return rows;
   }
+
   static async getRolesWithPermissions(userId: number) {
     const db = getDb();
 
-    return db.all(
+    const { rows } = await db.query(
       `
-    SELECT
-      r.id   AS roleId,
-      r.name AS roleName,
-      p.name AS permission
+      SELECT
+        r.id   AS role_id,
+        r.name AS role_name,
+        p.name AS permission
       FROM user_roles ur
-      JOIN roles r ON r.id = ur.roleId
-      LEFT JOIN role_permissions rp ON rp.roleId = r.id
-      LEFT JOIN permissions p ON p.id = rp.permissionId
-      WHERE ur.userId = ?
-    `,
+      JOIN roles r ON r.id = ur.role_id
+      LEFT JOIN role_permissions rp ON rp.role_id = r.id
+      LEFT JOIN permissions p ON p.id = rp.permission_id
+      WHERE ur.user_id = $1
+      `,
       [userId],
     );
+
+    return rows;
   }
 }

@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt, { JwtPayload, Secret } from 'jsonwebtoken';
 import { env } from '../../config/env';
 import { UserRepository } from '../user/user.repository';
-import { RefreshTokenRepository } from './refresh-token.repository';
+import { RefreshTokenRepository } from './auth.repository';
 import { SignOptions } from 'jsonwebtoken';
 export class AuthService {
   static async login(data: any) {
@@ -11,7 +11,7 @@ export class AuthService {
     const user = await UserRepository.findByEmail(email);
     if (!user) throw new Error('Invalid credentials');
 
-    const match = await bcrypt.compare(password, user.passwordHash);
+    const match = await bcrypt.compare(password, user.password_hash);
     if (!match) throw new Error('Invalid credentials');
 
     await RefreshTokenRepository.deleteByUserId(user.id);
@@ -46,11 +46,11 @@ export class AuthService {
     }
 
     if (new Date(stored.expiresAt) < new Date()) {
-      await RefreshTokenRepository.deleteByUserId(stored.userId);
+      await RefreshTokenRepository.deleteByUserId(stored.user_id);
       throw new Error('Refresh token expired');
     }
 
-    const user = await UserRepository.findById(stored.userId);
+    const user = await UserRepository.findById(stored.user_id);
     if (!user) {
       throw new Error('User not found');
     }
@@ -65,6 +65,6 @@ export class AuthService {
   static async logout(refreshToken: string) {
     const stored = await RefreshTokenRepository.find(refreshToken);
     if (!stored) return;
-    await RefreshTokenRepository.deleteByUserId(stored.userId);
+    await RefreshTokenRepository.deleteByUserId(stored.user_id);
   }
 }
