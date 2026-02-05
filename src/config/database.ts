@@ -17,7 +17,6 @@ export const initDatabase = async () => {
     name TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
     passwordHash TEXT NOT NULL,
-    role TEXT DEFAULT 'USER',
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
     );
@@ -74,6 +73,84 @@ export const initDatabase = async () => {
     FOREIGN KEY (userId) REFERENCES users(id)
   );
     `);
+  await db.exec(
+    `
+      CREATE TABLE IF NOT EXISTS roles (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT UNIQUE NOT NULL,
+      description TEXT
+      );
+      `,
+  );
+  await db.exec(
+    `
+      CREATE TABLE IF NOT EXISTS permissions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT UNIQUE NOT NULL,
+      description TEXT
+      );
+      `,
+  );
+  await db.exec(
+    `
+      CREATE TABLE IF NOT EXISTS role_permissions (
+      roleId INTEGER NOT NULL,
+      permissionId INTEGER NOT NULL,
+      PRIMARY KEY (roleId, permissionId),
+      FOREIGN KEY (roleId) REFERENCES roles(id) ON DELETE CASCADE,
+      FOREIGN KEY (permissionId) REFERENCES permissions(id) ON DELETE CASCADE
+      );
+      `,
+  );
+  await db.exec(
+    `
+      CREATE TABLE IF NOT EXISTS user_roles (
+      userId INTEGER NOT NULL,
+      roleId INTEGER NOT NULL,
+      PRIMARY KEY (userId, roleId),
+      FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (roleId) REFERENCES roles(id) ON DELETE CASCADE
+      );
+      `,
+  );
+  await db.exec(
+    `
+    INSERT OR IGNORE INTO roles (name, description) VALUES
+    ('ADMIN', 'System administrator'),
+    ('USER', 'Normal user');
+    `,
+  );
+  await db.exec(
+    `
+    INSERT OR IGNORE INTO permissions (name, description) VALUES
+    ('CREATE_PRODUCT', 'Create new products'),
+    ('UPDATE_PRODUCT', 'Update product'),
+    ('DELETE_PRODUCT', 'Delete product'),
+    ('CREATE_CATEGORY', 'Create new category'),
+    ('UPDATE_CATEGORY', 'Update category'),
+    ('DELETE_CATEGORY', 'Delete category'),
+    ('VIEW_CATEGORIES','View all categories'),
+    ('PLACE_ORDER', 'Place an order'),
+    ('VIEW_OWN_ORDER','View Own Orders'),
+    ('VIEW_ALL_ORDERS', 'View all orders'),
+    ('MANAGE_ROLES','Manage All roles');
+    `,
+  );
+  await db.exec(
+    `
+  INSERT OR IGNORE INTO role_permissions (roleId, permissionId)
+  SELECT r.id, p.id FROM roles r, permissions p
+  WHERE r.name = 'ADMIN';
+  `,
+  );
+  await db.exec(
+    `
+  INSERT OR IGNORE INTO role_permissions (roleId, permissionId)
+  SELECT r.id, p.id FROM roles r
+  JOIN permissions p ON p.name IN ('PLACE_ORDER','VIEW_OWN_ORDER','VIEW_CATEGORIES')
+  WHERE r.name = 'USER';
+  `,
+  );
   console.log('SQLite database initialized');
 };
 

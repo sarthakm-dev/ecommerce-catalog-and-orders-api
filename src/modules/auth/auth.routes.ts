@@ -5,7 +5,7 @@ const router = Router();
 
 /**
  * @swagger
- * /auth/login:
+ * /api/auth/login:
  *   post:
  *     tags:
  *       - Auth
@@ -46,7 +46,7 @@ router.post('/login', login);
 
 /**
  * @swagger
- * /auth/refresh:
+ * /api/auth/refresh:
  *   post:
  *     tags:
  *       - Auth
@@ -80,7 +80,7 @@ router.post('/refresh', refreshToken);
 
 /**
  * @swagger
- * /auth/logout:
+ * /api/auth/logout:
  *   delete:
  *     tags:
  *       - Auth

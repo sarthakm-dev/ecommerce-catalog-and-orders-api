@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import { createOrder, getOrder } from './order.controller';
-import { authMiddleware } from '../../middlewares/auth.middleware';
+import { authMiddleware, requirePermission } from '../../middlewares/auth.middleware';
 
 const router = Router();
 
 /**
  * @swagger
- * /orders:
+ * /api/orders:
  *   post:
  *     tags:
  *       - Orders
@@ -45,11 +45,11 @@ const router = Router();
  *       401:
  *         description: Unauthorized
  */
-router.post('/', authMiddleware, createOrder);
+router.post('/', authMiddleware, requirePermission('PLACE_ORDER'), createOrder);
 
 /**
  * @swagger
- * /orders/{id}:
+ * /api/orders/{id}:
  *   get:
  *     tags:
  *       - Orders
@@ -74,6 +74,6 @@ router.post('/', authMiddleware, createOrder);
  *       404:
  *         description: Order not found
  */
-router.get('/:id', authMiddleware, getOrder);
+router.get('/:id', authMiddleware, requirePermission('VIEW_OWN_ORDER'), getOrder);
 
 export default router;

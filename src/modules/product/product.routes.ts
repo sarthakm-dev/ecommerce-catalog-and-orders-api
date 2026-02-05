@@ -6,13 +6,13 @@ import {
   updateProduct,
   deleteProduct,
 } from './product.controller';
-import { authMiddleware, requiredRole } from '../../middlewares/auth.middleware';
+import { authMiddleware, requirePermission } from '../../middlewares/auth.middleware';
 
 const router = Router();
 
 /**
  * @swagger
- * /products:
+ * /api/products:
  *   post:
  *     tags:
  *       - Products
@@ -52,11 +52,11 @@ const router = Router();
  *       403:
  *         description: Forbidden (Admin only)
  */
-router.post('/', authMiddleware, requiredRole('ADMIN'), createProduct);
+router.post('/', authMiddleware, requirePermission('CREATE_PRODUCT'), createProduct);
 
 /**
  * @swagger
- * /products:
+ * /api/products:
  *   get:
  *     tags:
  *       - Products
@@ -70,7 +70,7 @@ router.get('/', getProducts);
 
 /**
  * @swagger
- * /products/{id}:
+ * /api/products/{id}:
  *   get:
  *     tags:
  *       - Products
@@ -93,7 +93,7 @@ router.get('/:id', getProductById);
 
 /**
  * @swagger
- * /products/{id}:
+ * /api/products/{id}:
  *   patch:
  *     tags:
  *       - Products
@@ -135,11 +135,11 @@ router.get('/:id', getProductById);
  *       404:
  *         description: Product not found
  */
-router.patch('/:id', authMiddleware, updateProduct);
+router.patch('/:id', authMiddleware, requirePermission('UPDATE_PRODUCT'), updateProduct);
 
 /**
  * @swagger
- * /products/{id}:
+ * /api/products/{id}:
  *   delete:
  *     tags:
  *       - Products
@@ -162,6 +162,6 @@ router.patch('/:id', authMiddleware, updateProduct);
  *       404:
  *         description: Product not found
  */
-router.delete('/:id', authMiddleware, deleteProduct);
+router.delete('/:id', authMiddleware, requirePermission('DELETE_PRODUCT'), deleteProduct);
 
 export default router;

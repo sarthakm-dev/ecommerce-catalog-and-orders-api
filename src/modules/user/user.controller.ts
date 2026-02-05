@@ -1,3 +1,4 @@
+import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
 import { Request, Response, NextFunction } from 'express';
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
@@ -35,7 +36,6 @@ export const deleteMe = async (req: Request, res: Response, next: NextFunction) 
 
 export const updateName = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    console.log(req.user);
     await UserService.updateName(req.body, Number(req.user?.userId));
     res.status(200).json({ message: 'Name Updated Successfully' });
   } catch (err) {
@@ -43,15 +43,54 @@ export const updateName = async (req: Request, res: Response, next: NextFunction
   }
 };
 
-export const updatePrivillege = async (req: Request, res: Response, next: NextFunction) => {
+export const assignRole = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const id = Number(req.params.id);
-    const { role } = req.body;
-    if (!['ADMIN', 'USER'].includes(role)) {
-      return res.status(400).json({ message: 'Invalid role' });
+    const userId = Number(req.params.id);
+    const roleId = parseInt(req.body.roleId, 10);
+    console.log('raw body', req.body);
+    console.log('roleId', roleId);
+    if (!userId || !roleId) {
+      return res.status(400).json({ message: 'userId and roleId are required' });
     }
-    await UserService.updateUserRole(id, role);
-    res.status(200).json({ message: 'Role updated' });
+
+    await UserRepository.clearRoles(userId);
+
+    await UserRepository.assign(userId, roleId);
+
+    res.json({ message: 'Role assigned successfully' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getUserRoles = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = Number(req.params.id);
+
+    if (!userId) {
+      return res.status(400).json({ message: 'Invalid userId' });
+    }
+
+    const rows = await UserRepository.getRolesWithPermissions(userId);
+
+    const roleMap: Record<number, any> = {};
+
+    for (const row of rows) {
+      if (!roleMap[row.roleId]) {
+        roleMap[row.roleId] = {
+          id: row.roleId,
+          name: row.roleName,
+          permissions: [],
+        };
+      }
+
+      roleMap[row.roleId].permissions.push(row.permission);
+    }
+
+    res.json({
+      userId,
+      roles: Object.values(roleMap),
+    });
   } catch (err) {
     next(err);
   }

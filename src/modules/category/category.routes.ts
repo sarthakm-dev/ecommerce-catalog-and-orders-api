@@ -6,13 +6,13 @@ import {
   deleteCategory,
   updateCategory,
 } from './category.controller';
-import { authMiddleware, requiredRole } from '../../middlewares/auth.middleware';
+import { authMiddleware, requirePermission } from '../../middlewares/auth.middleware';
 
 const router = Router();
 
 /**
  * @swagger
- * /categories:
+ * /api/categories:
  *   post:
  *     tags:
  *       - Categories
@@ -40,11 +40,11 @@ const router = Router();
  *       403:
  *         description: Forbidden (Admin only)
  */
-router.post('/', authMiddleware, requiredRole('ADMIN'), createCategory);
+router.post('/', authMiddleware, requirePermission('CREATE_CATEGORY'), createCategory);
 
 /**
  * @swagger
- * /categories:
+ * /api/categories:
  *   get:
  *     tags:
  *       - Categories
@@ -54,11 +54,11 @@ router.post('/', authMiddleware, requiredRole('ADMIN'), createCategory);
  *       200:
  *         description: List of categories returned successfully
  */
-router.get('/', getCategories);
+router.get('/', authMiddleware, requirePermission('VIEW_CATEGORIES'), getCategories);
 
 /**
  * @swagger
- * /categories/{id}:
+ * /api/categories/{id}:
  *   get:
  *     tags:
  *       - Categories
@@ -77,11 +77,11 @@ router.get('/', getCategories);
  *       404:
  *         description: Category not found
  */
-router.get('/:id', getCategoryById);
+router.get('/:id', authMiddleware, requirePermission('VIEW_CATEGORIES'), getCategoryById);
 
 /**
  * @swagger
- * /categories/{id}:
+ * /api/categories/{id}:
  *   patch:
  *     tags:
  *       - Categories
@@ -114,11 +114,11 @@ router.get('/:id', getCategoryById);
  *       404:
  *         description: Category not found
  */
-router.patch('/:id', authMiddleware, updateCategory);
+router.patch('/:id', authMiddleware, requirePermission('UPDATE_CATEGORY'), updateCategory);
 
 /**
  * @swagger
- * /categories/{id}:
+ * /api/categories/{id}:
  *   delete:
  *     tags:
  *       - Categories
@@ -141,6 +141,6 @@ router.patch('/:id', authMiddleware, updateCategory);
  *       404:
  *         description: Category not found
  */
-router.delete('/:id', authMiddleware, deleteCategory);
+router.delete('/:id', authMiddleware, requirePermission('DELETE_CATEGORY'), deleteCategory);
 
 export default router;

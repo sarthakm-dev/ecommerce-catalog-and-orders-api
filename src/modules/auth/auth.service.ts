@@ -16,11 +16,11 @@ export class AuthService {
 
     await RefreshTokenRepository.deleteByUserId(user.id);
 
-    const accessToken = jwt.sign({ userId: user.id, role: user.role }, env.JWT_SECRET, {
+    const accessToken = jwt.sign({ userId: user.id }, env.JWT_SECRET, {
       expiresIn: env.ACCESS_TOKEN_EXPIRES_IN,
     });
 
-    const refreshToken = jwt.sign({ userId: user.id, role: user.role }, env.REFRESH_SECRET, {
+    const refreshToken = jwt.sign({ userId: user.id }, env.REFRESH_SECRET, {
       expiresIn: env.REFRESH_TOKEN_EXPIRES_IN,
     });
 
@@ -55,7 +55,7 @@ export class AuthService {
       throw new Error('User not found');
     }
 
-    const accessToken = jwt.sign({ userId: user.id, role: user.role }, env.JWT_SECRET, {
+    const accessToken = jwt.sign({ userId: user.id }, env.JWT_SECRET, {
       expiresIn: env.ACCESS_TOKEN_EXPIRES_IN,
     });
 

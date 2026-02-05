@@ -37,12 +37,4 @@ export class UserService {
       throw new Error('User not found');
     }
   }
-
-  static async updateUserRole(id: number, role: 'ADMIN' | 'USER') {
-    const user = await UserRepository.findById(id);
-    if (!user) {
-      throw new Error('User not found');
-    }
-    await UserRepository.updateRole(id, role);
-  }
 }

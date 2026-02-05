@@ -1,12 +1,19 @@
 import { Router } from 'express';
-import { createUser, getMe, deleteMe, updateName, updatePrivillege } from './user.controller';
+import {
+  createUser,
+  getMe,
+  deleteMe,
+  updateName,
+  assignRole,
+  getUserRoles,
+} from './user.controller';
 import { authMiddleware } from '../../middlewares/auth.middleware';
 
 const router = Router();
 
 /**
  * @swagger
- * /users/register:
+ * /api/users/register:
  *   post:
  *     tags:
  *       - Users
@@ -42,7 +49,7 @@ router.post('/register', createUser);
 
 /**
  * @swagger
- * /users/me:
+ * /api/users/me:
  *   get:
  *     tags:
  *       - Users
@@ -60,7 +67,7 @@ router.get('/me', authMiddleware, getMe);
 
 /**
  * @swagger
- * /users/me:
+ * /api/users/me:
  *   delete:
  *     tags:
  *       - Users
@@ -78,7 +85,7 @@ router.delete('/me', authMiddleware, deleteMe);
 
 /**
  * @swagger
- * /users/me:
+ * /api/users/me:
  *   patch:
  *     tags:
  *       - Users
@@ -106,12 +113,14 @@ router.patch('/me', authMiddleware, updateName);
 
 /**
  * @swagger
- * /users/{id}/role:
- *   patch:
+ * /api/users/{id}/role:
+ *   post:
+ *     summary: Assign role to a user
+ *     description: >
+ *       Assigns a role to a user.
+ *       Existing roles of the user are cleared before assigning the new role.
  *     tags:
  *       - Users
- *     summary: Update user role
- *     description: Update role of a user (ADMIN / USER). Intended for admin usage.
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -120,27 +129,88 @@ router.patch('/me', authMiddleware, updateName);
  *         required: true
  *         schema:
  *           type: integer
- *         example: 2
+ *         description: User ID
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - roleId
  *             properties:
- *               role:
- *                 type: string
- *                 enum:
- *                   - ADMIN
- *                   - USER
+ *               roleId:
+ *                 type: integer
+ *                 example: 1
+ *                 description: Role ID to assign
  *     responses:
  *       200:
- *         description: User role updated successfully
+ *         description: Role assigned successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Role assigned successfully
+ *       400:
+ *         description: Invalid request data
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (missing MANAGE_ROLES permission)
+ */
+router.post('/:id/role', authMiddleware, assignRole);
+
+/**
+ * @swagger
+ * /api/users/{id}/roles:
+ *   get:
+ *     summary: Get roles assigned to a user
+ *     description: Returns all roles and permissions assigned to a user.
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User roles and permissions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 userId:
+ *                   type: integer
+ *                   example: 1
+ *                 roles:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         example: 1
+ *                       name:
+ *                         type: string
+ *                         example: ADMIN
+ *                       permissions:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                           example: CREATE_PRODUCT
  *       401:
  *         description: Unauthorized
  *       403:
  *         description: Forbidden
  */
-router.patch('/:id/role', authMiddleware, updatePrivillege);
-
+router.get('/:id/roles', authMiddleware, getUserRoles);
 export default router;
