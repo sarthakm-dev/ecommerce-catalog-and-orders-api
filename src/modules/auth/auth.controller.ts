@@ -23,7 +23,6 @@ export const refreshToken = async (req: Request, res: Response, next: NextFuncti
 export const logout = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { refreshToken } = req.body;
-    console.log('Refresh Token', req.body);
     await AuthService.logout(refreshToken);
     res.status(204).send();
   } catch (err) {

@@ -3,7 +3,6 @@ import jwt, { JwtPayload, Secret } from 'jsonwebtoken';
 import { env } from '../../config/env';
 import { UserRepository } from '../user/user.repository';
 import { RefreshTokenRepository } from './refresh-token.repository';
-import { SignOptions } from 'jsonwebtoken';
 export class AuthService {
   static async login(data: any) {
     const { email, password } = data;

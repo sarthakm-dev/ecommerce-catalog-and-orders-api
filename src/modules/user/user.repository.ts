@@ -78,8 +78,8 @@ export class UserRepository {
       p.name AS permission
       FROM user_roles ur
       JOIN roles r ON r.id = ur.roleId
-      LEFT JOIN role_permissions rp ON rp.roleId = r.id
-      LEFT JOIN permissions p ON p.id = rp.permissionId
+      JOIN role_permissions rp ON rp.roleId = r.id
+      JOIN permissions p ON p.id = rp.permissionId
       WHERE ur.userId = ?
     `,
       [userId],
