@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { UserRepository } from './user.repository';
 import { validateCreateUser } from './user.validation';
+import { PermissionRepository } from '../permission/permission.repository';
 
 export class UserService {
   static async createUser(data: any) {
@@ -12,7 +13,9 @@ export class UserService {
     }
 
     const passwordHash = await bcrypt.hash(data.password, 10);
-    return UserRepository.create(data.name, data.email, passwordHash);
+    const id = await UserRepository.create(data.name, data.email, passwordHash);
+    await UserRepository.assign(id, 2);
+    return id;
   }
 
   static async getProfile(userId: number) {
@@ -36,5 +39,42 @@ export class UserService {
     if (updated === 0) {
       throw new Error('User not found');
     }
+  }
+
+  static async getUserRoles(userId: number) {
+    const rows = await UserRepository.getRolesWithPermissions(userId);
+    if (!rows) {
+      throw new Error('Cant Find Permissions for this user');
+    }
+    const roleMap: Record<number, any> = {};
+
+    for (const row of rows) {
+      if (!roleMap[row.roleId]) {
+        roleMap[row.roleId] = {
+          id: row.roleId,
+          name: row.roleName,
+          permissions: [],
+        };
+      }
+
+      roleMap[row.roleId].permissions.push(row.permission);
+    }
+    return roleMap;
+  }
+  static async assignRole(emailId: string, roleName: string) {
+    const user = await UserRepository.findByEmail(emailId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    const userId = user.id;
+    const role = await PermissionRepository.getRoleId(roleName);
+    if (!role) {
+      throw new Error('Role not found');
+    }
+    const roleId = Number(role.id);
+
+    await UserRepository.clearRoles(userId);
+
+    await UserRepository.assign(userId, roleId);
   }
 }

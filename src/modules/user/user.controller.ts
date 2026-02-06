@@ -47,23 +47,12 @@ export const updateName = async (req: Request, res: Response, next: NextFunction
 export const assignRole = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { emailId, roleName } = req.body;
-    console.log('EmailID', emailId, 'RoleName:', roleName);
+
     if (!emailId || !roleName) {
       return res.status(400).json({ message: 'emailId and roleName both are required' });
     }
-    const user = await UserRepository.findByEmail(emailId);
-    const userId = user.id;
-    const role = await PermissionRepository.getRoleId(roleName);
-    const roleId = Number(role.id);
-    console.log('raw body', req.body);
-    console.log('roleId', roleId);
-    if (!userId || !roleId) {
-      return res.status(400).json({ message: 'userId and roleId are required' });
-    }
 
-    await UserRepository.clearRoles(userId);
-
-    await UserRepository.assign(userId, roleId);
+    await UserService.assignRole(emailId, roleName);
 
     res.json({ message: 'Role assigned successfully' });
   } catch (err) {
@@ -79,21 +68,7 @@ export const getUserRoles = async (req: Request, res: Response, next: NextFuncti
       return res.status(400).json({ message: 'Invalid userId' });
     }
 
-    const rows = await UserRepository.getRolesWithPermissions(userId);
-
-    const roleMap: Record<number, any> = {};
-
-    for (const row of rows) {
-      if (!roleMap[row.roleId]) {
-        roleMap[row.roleId] = {
-          id: row.roleId,
-          name: row.roleName,
-          permissions: [],
-        };
-      }
-
-      roleMap[row.roleId].permissions.push(row.permission);
-    }
+    const roleMap = await UserService.getUserRoles(userId);
 
     res.json({
       userId,
