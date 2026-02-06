@@ -1,5 +1,3 @@
-import dotenv from 'dotenv';
-dotenv.config();
 import ms from 'ms';
 export const env = {
   PORT: Number(process.env.PORT || 3000),
