@@ -71,6 +71,7 @@ export const initDatabase = async () => {
     expiresAt DATETIME NOT NULL,
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (userId) REFERENCES users(id)
+    ON DELETE CASCADE
   );
     `);
   await db.exec(

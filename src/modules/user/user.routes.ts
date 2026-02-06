@@ -7,7 +7,7 @@ import {
   assignRole,
   getUserRoles,
 } from './user.controller';
-import { authMiddleware } from '../../middlewares/auth.middleware';
+import { authMiddleware, requirePermission } from '../../middlewares/auth.middleware';
 
 const router = Router();
 
@@ -159,7 +159,7 @@ router.patch('/me', authMiddleware, updateName);
  *       403:
  *         description: Forbidden (missing MANAGE_ROLES permission)
  */
-router.post('/role', authMiddleware, assignRole);
+router.post('/role', authMiddleware, requirePermission('MANAGE_ROLES'), assignRole);
 
 /**
  * @swagger

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authMiddleware, requirePermission } from '../../middlewares/auth.middleware';
-import { attachPermissionToRole, getPermissionId, getRoleId } from './permission.controller';
+import { attachPermissionToRole, removePermissionFromRole } from './permission.controller';
 
 const router = Router();
 
@@ -46,4 +46,49 @@ const router = Router();
  */
 router.post('/', authMiddleware, requirePermission('MANAGE_ROLES'), attachPermissionToRole);
 
+/**
+ * @swagger
+ * /api/permissions/remove:
+ *   delete:
+ *     summary: Remove permissions from a role
+ *     tags:
+ *       - Permissions
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - roleName
+ *               - permissions
+ *             properties:
+ *               roleName:
+ *                 type: string
+ *                 example: USER
+ *               permissions:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ['CREATE_PRODUCT', 'PLACE_ORDER']
+ *     responses:
+ *       200:
+ *         description: Permissions removed successfully
+ *       400:
+ *         description: Invalid input
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (missing MANAGE_ROLES permission)
+ *       404:
+ *         description: Role or permission not found
+ */
+router.delete(
+  '/remove',
+  authMiddleware,
+  requirePermission('MANAGE_ROLES'),
+  removePermissionFromRole,
+);
 export default router;

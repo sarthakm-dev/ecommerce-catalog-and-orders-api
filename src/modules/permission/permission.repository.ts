@@ -48,4 +48,19 @@ export class PermissionRepository {
       [roleId, permissionId],
     );
   }
+
+  static async removePermission(roleId: number, permissionId: number) {
+    const db = getDb();
+
+    const result = await db.run(
+      `
+    DELETE FROM role_permissions
+    WHERE roleId = $1
+    AND permissionId = $2
+    `,
+      [roleId, permissionId],
+    );
+
+    return result.changes;
+  }
 }

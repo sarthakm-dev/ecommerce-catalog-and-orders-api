@@ -1,54 +1,41 @@
 import { Request, Response, NextFunction } from 'express';
-import { PermissionRepository } from './permission.repository';
+import { PermissionService } from './permission.service';
 
 export const attachPermissionToRole = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { roleName, permissions } = req.body;
-    if (!roleName) {
+
+    if (!roleName || !Array.isArray(permissions)) {
       return res.status(400).json({
-        message: 'roleName is required',
+        message: 'roleName and permissions[] are required',
       });
     }
-    const role = await PermissionRepository.getRoleId(roleName);
-    const roleId = Number(role.id);
-    if (Array.isArray(permissions) && permissions.length > 0) {
-      const permissionIds = await PermissionRepository.getPermissionId(permissions);
 
-      for (const { id: permissionId } of permissionIds) {
-        await PermissionRepository.attachPermission(roleId, permissionId);
-      }
-    }
+    await PermissionService.attachPermissionsToRole(roleName, permissions);
 
-    res.json({ message: 'Role Assigned' });
+    res.status(200).json({
+      message: 'Permissions assigned to role',
+    });
   } catch (err) {
     next(err);
   }
 };
 
-export const getPermissionId = async (req: Request, res: Response, next: NextFunction) => {
+export const removePermissionFromRole = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { permissions } = req.body;
-    console.log('Permissions', permissions);
-    if (!permissions) {
-      return res.status(400).json({ message: 'permissions array is required' });
-    }
-    const result = await PermissionRepository.getPermissionId(permissions);
-    console.log('Permission Res:', result);
-    res.status(200).send(result);
-  } catch (err) {
-    next(err);
-  }
-};
+    const { roleName, permissions } = req.body;
 
-export const getRoleId = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { roleName } = req.body;
-    if (!roleName) {
-      return res.status(400).json({ message: 'roleName is required' });
+    if (!roleName || !Array.isArray(permissions)) {
+      return res.status(400).json({
+        message: 'roleName and permissions[] are required',
+      });
     }
-    const result = await PermissionRepository.getRoleId(roleName);
-    console.log('Permission Res:', result);
-    res.status(200).send(result);
+
+    await PermissionService.removePermissionsFromRole(roleName, permissions);
+
+    res.status(200).json({
+      message: 'Permissions removed from role',
+    });
   } catch (err) {
     next(err);
   }
